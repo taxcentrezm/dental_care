@@ -162,6 +162,18 @@ footer{
   color:#555;
 }
 </style>
+  <style>
+.modal { display:none; position:fixed; z-index:1500; left:0;top:0;width:100%;height:100%; background:rgba(0,0,0,0.6); backdrop-filter:blur(6px); justify-content:center; align-items:center; }
+.modal-content{ background:#fff; padding:20px; border-radius:12px; max-height:90%; overflow-y:auto; position:relative; }
+.modal-close{ position:absolute; top:10px; right:15px; font-size:28px; cursor:pointer; }
+.step-form{ display:none; flex-direction:column; gap:10px; }
+.step-form.active{ display:flex; }
+.step-btn{ padding:10px; border:none; border-radius:6px; cursor:pointer; text-align:left; background:#f0f0f0; transition:0.3s; }
+.step-btn.active{ background:#0078d7; color:#fff; }
+input, select, textarea{ width:100%; padding:10px; border-radius:6px; border:1px solid #ccc; box-sizing:border-box; }
+.commitment-btn{ background:#0078d7; color:#fff; padding:10px; border:none; border-radius:8px; cursor:pointer; transition:0.3s; }
+.commitment-btn:hover{ background:#005fa3; }
+</style>
 </head>
 <body>
 
@@ -202,7 +214,10 @@ footer{
     <div class="hero-text">
       <h2>Professional Dental Care in Zambia</h2>
       <p>Delivering high-quality dental services with modern techniques and personalized care for all patients.</p>
-      <button>Book Appointment</button>
+      <!-- Book Appointment Button -->
+<div style="text-align:center;margin:30px 0;">
+  <button id="bookAppointmentBtn" class="commitment-btn">Book Appointment</button>
+</div>
     </div>
     <img src="dr.jpg" alt="Dr----">
   </section>
@@ -241,6 +256,141 @@ footer{
       <canvas id="servicesChart"></canvas>
     </div>
   </section>
+
+
+<!-- Three-Sided Appointment Modal -->
+<div id="appointmentModal" class="modal">
+  <div class="modal-content" style="max-width:900px; display:flex; flex-direction:row; gap:20px;">
+
+    <!-- Left: Embedded Map -->
+    <div style="flex:1;">
+      <h3 style="text-align:center;color:#0078d7;">Our Clinic Location</h3>
+      <iframe src="https://www.google.com/maps/embed?pb=!1m18!..." width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+    </div>
+
+    <!-- Center: Step Navbar -->
+    <div style="flex:0.3; display:flex; flex-direction:column; justify-content:flex-start; gap:20px;">
+      <h3 style="text-align:center;color:#0078d7;">Steps</h3>
+      <div id="stepsNav" style="display:flex; flex-direction:column; gap:10px;">
+        <button class="step-btn active" data-step="1">1. Personal Details</button>
+        <button class="step-btn" data-step="2">2. Service Details</button>
+        <button class="step-btn" data-step="3">3. Date & Notes</button>
+      </div>
+    </div>
+
+    <!-- Right: Step Form -->
+    <div style="flex:1;">
+      <span class="modal-close" id="closeAppointmentModal">&times;</span>
+      <h2 style="text-align:center;color:#0078d7;">Book Appointment</h2>
+      <div id="stepForms">
+
+        <!-- Step 1: Personal Details -->
+        <div class="step-form active">
+          <input type="text" id="patientName" placeholder="Full Name" />
+          <input type="email" id="patientEmail" placeholder="Email Address" />
+          <input type="tel" id="patientPhone" placeholder="Phone Number" />
+          <button class="commitment-btn" data-next="2">Next</button>
+        </div>
+
+        <!-- Step 2: Service Details -->
+        <div class="step-form">
+          <select id="serviceType">
+            <option value="">Select Service</option>
+            <option>Consultation</option>
+            <option>Cleaning</option>
+            <option>Filling</option>
+            <option>Extraction</option>
+          </select>
+          <textarea id="serviceNotes" placeholder="Describe your concern..." rows="4"></textarea>
+          <div style="display:flex; gap:10px; margin-top:10px;">
+            <button class="commitment-btn" data-prev="1">Back</button>
+            <button class="commitment-btn" data-next="3">Next</button>
+          </div>
+        </div>
+
+        <!-- Step 3: Date & Notes -->
+        <div class="step-form">
+          <input type="date" id="appointmentDate" />
+          <input type="time" id="appointmentTime" />
+          <textarea id="additionalNotes" placeholder="Additional Notes..." rows="3"></textarea>
+          <div style="display:flex; gap:10px; margin-top:10px;">
+            <button class="commitment-btn" data-prev="2">Back</button>
+            <button class="commitment-btn" id="submitAppointment">Submit</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+// Modal logic
+const appointmentModal = document.getElementById('appointmentModal');
+const bookAppointmentBtn = document.getElementById('bookAppointmentBtn');
+const closeAppointmentModal = document.getElementById('closeAppointmentModal');
+
+bookAppointmentBtn.onclick = () => appointmentModal.style.display = 'flex';
+closeAppointmentModal.onclick = () => appointmentModal.style.display = 'none';
+window.onclick = e => { if(e.target === appointmentModal) appointmentModal.style.display='none'; };
+
+// Step navigation
+const steps = document.querySelectorAll('.step-btn');
+const stepForms = document.querySelectorAll('.step-form');
+
+steps.forEach(btn => {
+  btn.addEventListener('click', ()=>{
+    const step = btn.dataset.step;
+    stepForms.forEach(f => f.classList.remove('active'));
+    document.querySelector(`.step-form:nth-child(${step})`).classList.add('active');
+    steps.forEach(s=>s.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+// Next / Back buttons
+document.querySelectorAll('[data-next]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const next = btn.dataset.next;
+    stepForms.forEach(f => f.classList.remove('active'));
+    document.querySelector(`.step-form:nth-child(${next})`).classList.add('active');
+    steps.forEach(s=>s.classList.remove('active'));
+    document.querySelector(`.step-btn[data-step="${next}"]`).classList.add('active');
+  });
+});
+document.querySelectorAll('[data-prev]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const prev = btn.dataset.prev;
+    stepForms.forEach(f => f.classList.remove('active'));
+    document.querySelector(`.step-form:nth-child(${prev})`).classList.add('active');
+    steps.forEach(s=>s.classList.remove('active'));
+    document.querySelector(`.step-btn[data-step="${prev}"]`).classList.add('active');
+  });
+});
+
+// Submit appointment
+document.getElementById('submitAppointment').onclick = ()=>{
+  const name = document.getElementById('patientName').value || 'Anonymous';
+  const email = document.getElementById('patientEmail').value || 'N/A';
+  const phone = document.getElementById('patientPhone').value || 'N/A';
+  const service = document.getElementById('serviceType').value || 'General';
+  const serviceNotes = document.getElementById('serviceNotes').value || 'None';
+  const date = document.getElementById('appointmentDate').value || 'N/A';
+  const time = document.getElementById('appointmentTime').value || 'N/A';
+  const additional = document.getElementById('additionalNotes').value || 'None';
+
+  alert(`Appointment Booked!\nName: ${name}\nEmail: ${email}\nPhone: ${phone}\nService: ${service}\nDate: ${date}\nTime: ${time}\nNotes: ${serviceNotes}\nAdditional: ${additional}`);
+
+  appointmentModal.style.display='none';
+  document.querySelectorAll('input,textarea,select').forEach(i=>i.value='');
+  steps.forEach(s=>s.classList.remove('active'));
+  steps[0].classList.add('active');
+  stepForms.forEach(f=>f.classList.remove('active'));
+  stepForms[0].classList.add('active');
+};
+</script>
 
   <footer id="contact">
     <p>&copy; 2025 Dr ---- - Dental Surgeon, Zambia. All rights reserved.</p>
