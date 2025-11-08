@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dr Njayi | Dental Surgeon Zambia</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/feather-icons"></script>
+<style>
+:root {
+  --primary:#0078d7;
+  --secondary:#ffd43b;
+  --dark:#111;
+  --light:#f9fafc;
+  --bg-dark:#161b22;
+}
+
+body{
+  margin:0;
+  font-family:'Open Sans',sans-serif;
+  background:var(--light);
+  color:#333;
+  overflow-x:hidden;
+}
+
+h1,h2,h3{font-family:'Poppins',sans-serif; margin:0 0 10px 0;}
+h2{color:var(--primary);}
+a{text-decoration:none;color:inherit;}
+button{cursor:pointer;}
+
+/* Sidebar */
+.sidebar{
+  position:fixed;
+  left:-250px;
+  top:0;
+  width:250px;
+  height:100%;
+  background:var(--primary);
+  color:#fff;
+  padding:30px 20px;
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+  transition:all 0.4s ease;
+  z-index:2000;
+}
+.sidebar.show{left:0;}
+.sidebar h2{text-align:center;margin-bottom:30px;color:var(--secondary);}
+.sidebar a{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 15px;
+  border-radius:8px;
+  transition:0.3s;
+}
+.sidebar a:hover{background:rgba(255,255,255,0.1);}
+.sidebar .close-btn{
+  align-self:flex-end;
+  font-size:24px;
+  margin-bottom:20px;
+}
+
+/* Main */
+.main{
+  margin-left:0;
+  transition:margin-left 0.4s ease;
+  padding:20px 40px;
+}
+.main.shift{margin-left:250px;}
+
+/* Header */
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:20px 0;
+}
+header h1{color:var(--primary);}
+header button{background:var(--primary);color:#fff;padding:10px 15px;border:none;border-radius:8px;transition:0.3s;}
+header button:hover{background:var(--secondary);color:#000;}
+
+/* Hero Section */
+.hero{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:space-between;
+  margin-top:40px;
+  gap:20px;
+}
+.hero-text{flex:1; min-width:300px;}
+.hero-text h2{font-size:2.2rem;margin-bottom:20px;}
+.hero-text p{font-size:1.1rem; margin-bottom:20px;}
+.hero-text button{background:var(--secondary);color:#000; font-weight:600; padding:12px 25px; border:none; border-radius:8px; transition:0.3s;}
+.hero-text button:hover{background:#ffb703;}
+
+/* Hero image */
+.hero img{
+  max-width:500px;
+  width:100%;
+  border-radius:12px;
+  box-shadow:0 6px 20px rgba(0,0,0,0.15);
+  transform:translateY(50px);
+  opacity:0;
+  animation:fadeUp 1s forwards 0.3s;
+}
+
+/* Cards Section */
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:20px;
+  margin-top:60px;
+}
+.card{
+  background:#fff;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 4px 15px rgba(0,0,0,0.1);
+  text-align:center;
+  transform:translateY(30px);
+  opacity:0;
+  animation:fadeUp 0.8s forwards;
+}
+.card:nth-child(1){animation-delay:0.2s;}
+.card:nth-child(2){animation-delay:0.4s;}
+.card:nth-child(3){animation-delay:0.6s;}
+.card img{width:80px; margin-bottom:15px;}
+.card h3{margin-bottom:10px;}
+.card p{font-size:0.95rem;color:#555;}
+
+/* Charts Section */
+.charts{
+  display:flex;
+  flex-wrap:wrap;
+  gap:30px;
+  margin-top:60px;
+  justify-content:center;
+}
+.chart-container{
+  flex:1 1 300px;
+  max-width:400px;
+  height:300px;
+  background:#fff;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 4px 15px rgba(0,0,0,0.1);
+}
+
+/* Animations */
+@keyframes fadeUp{
+  to{opacity:1; transform:translateY(0);}
+}
+
+/* Footer */
+footer{
+  text-align:center;
+  padding:30px 0;
+  margin-top:60px;
+  color:#555;
+}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+  <span class="close-btn" id="closeSidebar">&times;</span>
+  <h2>Dr Njayi</h2>
+  <a href="#hero"><i data-feather="home"></i> Home</a>
+  <a href="#services"><i data-feather="briefcase"></i> Services</a>
+  <a href="#charts"><i data-feather="bar-chart-2"></i> Analytics</a>
+  <a href="#contact"><i data-feather="mail"></i> Contact</a>
+</div>
+
+<!-- Main -->
+<div class="main" id="main">
+  <header>
+    <h1>Dr Njayi</h1>
+    <button id="menuBtn"><i data-feather="menu"></i> Menu</button>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero" id="hero">
+    <div class="hero-text">
+      <h2>Professional Dental Care in Zambia</h2>
+      <p>Delivering high-quality dental services with modern techniques and personalized care for all patients.</p>
+      <button>Book Appointment</button>
+    </div>
+    <img src="https://via.placeholder.com/500x400.png?text=Dentist+Image" alt="Dr Njayi">
+  </section>
+
+  <!-- Cards / Services -->
+  <section class="cards" id="services">
+    <div class="card">
+      <img src="checkups.png" alt="Checkup">
+      <h3>Dental Checkups</h3>
+      <p>Comprehensive oral examinations to ensure healthy teeth and gums.</p>
+    </div>
+    <div class="card">
+      <img src="cosmetic.png" alt="Cosmetic">
+      <h3>Cosmetic Dentistry</h3>
+      <p>Enhance your smile with whitening, veneers, and aesthetic treatments.</p>
+    </div>
+    <div class="card">
+      <img src="oral.png" alt="Surgery">
+      <h3>Oral Surgery</h3>
+      <p>Professional surgical care for complex dental procedures.</p>
+    </div>
+  </section>
+
+  <!-- Charts -->
+  <section class="charts" id="charts">
+    <div class="chart-container">
+      <h3>Monthly Patients</h3>
+      <canvas id="patientsChart"></canvas>
+    </div>
+    <div class="chart-container">
+      <h3>Revenue</h3>
+      <canvas id="revenueChart"></canvas>
+    </div>
+    <div class="chart-container">
+      <h3>Services Distribution</h3>
+      <canvas id="servicesChart"></canvas>
+    </div>
+  </section>
+
+  <footer id="contact">
+    <p>&copy; 2025 Dr Njayi - Dental Surgeon, Zambia. All rights reserved.</p>
+  </footer>
+</div>
+
+<script>
+feather.replace();
+
+// Sidebar toggle
+const menuBtn = document.getElementById('menuBtn');
+const sidebar = document.getElementById('sidebar');
+const closeSidebar = document.getElementById('closeSidebar');
+const main = document.getElementById('main');
+
+menuBtn.onclick = ()=>{ sidebar.classList.add('show'); main.classList.add('shift'); }
+closeSidebar.onclick = ()=>{ sidebar.classList.remove('show'); main.classList.remove('shift'); }
+
+// ===== Mock Chart Data =====
+const months = ['Jan','Feb','Mar','Apr','May','Jun'];
+const patientsData = [15, 20, 18, 25, 30, 28];
+const revenueData = [5000, 7000, 6500, 8000, 9000, 8500];
+const servicesData = [12, 8, 5]; // Checkups, Cosmetic, Surgery
+
+// Patients Chart
+new Chart(document.getElementById('patientsChart'),{
+  type:'line',
+  data:{
+    labels:months,
+    datasets:[{label:'Patients', data:patientsData, borderColor:'#0078d7', backgroundColor:'rgba(0,120,215,0.2)', tension:0.3}]
+  },
+  options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}}
+});
+
+// Revenue Chart
+new Chart(document.getElementById('revenueChart'),{
+  type:'bar',
+  data:{
+    labels:months,
+    datasets:[{label:'Revenue (ZMW)', data:revenueData, backgroundColor:'#ffd43b'}]
+  },
+  options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}}
+});
+
+// Services Doughnut Chart
+new Chart(document.getElementById('servicesChart'),{
+  type:'doughnut',
+  data:{
+    labels:['Checkups','Cosmetic','Surgery'],
+    datasets:[{data:servicesData, backgroundColor:['#0078d7','#ff9800','#4CAF50']}]
+  },
+  options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom'}}}
+});
+</script>
+</body>
+</html>
