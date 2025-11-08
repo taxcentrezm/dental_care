@@ -162,17 +162,118 @@ footer{
   color:#555;
 }
 </style>
-  <style>
-.modal { display:none; position:fixed; z-index:1500; left:0;top:0;width:100%;height:100%; background:rgba(0,0,0,0.6); backdrop-filter:blur(6px); justify-content:center; align-items:center; }
-.modal-content{ background:#fff; padding:20px; border-radius:12px; max-height:90%; overflow-y:auto; position:relative; }
-.modal-close{ position:absolute; top:10px; right:15px; font-size:28px; cursor:pointer; }
-.step-form{ display:none; flex-direction:column; gap:10px; }
-.step-form.active{ display:flex; }
-.step-btn{ padding:10px; border:none; border-radius:6px; cursor:pointer; text-align:left; background:#f0f0f0; transition:0.3s; }
-.step-btn.active{ background:#0078d7; color:#fff; }
-input, select, textarea{ width:100%; padding:10px; border-radius:6px; border:1px solid #ccc; box-sizing:border-box; }
-.commitment-btn{ background:#0078d7; color:#fff; padding:10px; border:none; border-radius:8px; cursor:pointer; transition:0.3s; }
-.commitment-btn:hover{ background:#005fa3; }
+
+<style>
+/* Modal Background */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 2000;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(6px);
+  justify-content: center; align-items: center;
+}
+
+/* Modal Content */
+.modal-content {
+  max-width: 1000px;
+  width: 95%;
+  display: flex; flex-direction: row; gap: 20px;
+  background: rgba(255,255,255,0.95);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Left */
+.modal-left {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center;
+}
+.modal-left h3 { color: #0078d7; margin-bottom: 10px; font-weight: 600; display:flex; align-items:center; gap:5px;}
+.modal-left iframe {
+  width: 100%;
+  height: 400px;
+  border-radius: 15px;
+  border: 1px solid #ddd;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+/* Center */
+.modal-center {
+  flex: 0.3;
+  display: flex; flex-direction: column; align-items: flex-start;
+}
+.modal-center h3 { color: #0078d7; text-align: center; font-weight:600; display:flex; align-items:center; gap:5px;}
+#stepsNav {
+  display:flex; flex-direction: column; gap: 10px; margin-top: 20px;
+}
+.step-btn {
+  background: #f0f0f5;
+  color: #333;
+  border: none;
+  padding: 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  display:flex; align-items:center; gap:5px;
+  transition: 0.3s;
+}
+.step-btn.active { background: #0078d7; color: #fff; }
+.step-btn:hover { background:#cce0ff; }
+
+/* Right */
+.modal-right {
+  flex: 1;
+  position: relative;
+}
+.modal-close {
+  position: absolute;
+  top:10px; right:10px;
+  font-size:24px; cursor:pointer; color:#0078d7;
+}
+.modal-right h2 { text-align:center; color:#0078d7; margin-bottom:20px; display:flex; align-items:center; justify-content:center; gap:5px; }
+.step-form { display:none; flex-direction: column; gap:15px; }
+.step-form.active { display:flex; }
+
+/* Input with Icons */
+.input-wrapper { position: relative; }
+.input-wrapper i { position:absolute; top:12px; left:12px; color:#0078d7; }
+.input-wrapper input,
+.input-wrapper select,
+.input-wrapper textarea {
+  width: 100%;
+  padding: 12px 12px 12px 36px;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Buttons */
+.commitment-btn {
+  background: #0078d7;
+  color:#fff;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  display:flex; align-items:center; gap:5px;
+  transition: 0.3s;
+}
+.commitment-btn:hover { background:#005bb5; transform: scale(1.05); }
+
+/* Step button container */
+.step-btns { display:flex; gap:10px; justify-content: flex-end; }
+
+/* Animations */
+@keyframes slideIn { from {opacity:0; transform: translateY(-50px);} to {opacity:1; transform:translateY(0);} }
+
+@media(max-width:1200px){ .modal-content { flex-direction: column; } .modal-left, .modal-right, .modal-center { width:100%; } }
 </style>
 </head>
 <body>
@@ -260,75 +361,77 @@ input, select, textarea{ width:100%; padding:10px; border-radius:6px; border:1px
 
 <!-- Three-Sided Appointment Modal -->
 <div id="appointmentModal" class="modal">
-  <div class="modal-content" style="max-width:900px; display:flex; flex-direction:row; gap:20px;">
+  <div class="modal-content">
 
     <!-- Left: Embedded Map -->
-    <div style="flex:1;">
-      <h3 style="text-align:center;color:#0078d7;">Our Clinic Location</h3>
-      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3846.36924983537!2d28.283504874242283!
-        3d-15.410609413620323!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1940f5279fcffdbb%3A0xcf1f78e2
-        cf129563!2sTax%20Man%20Solution!5e0!3m2!1sen!2szm!4v1762627126496!5m2!1sen!2szm" width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+    <div class="modal-left">
+      <h3><i data-feather="map-pin"></i> Our Clinic Location</h3>
+      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3846.36924983537!2d28.283504874242283!3d-15.410609413620323!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1940f5279fcffdbb%3A0xcf1f78e2cf129563!2sTax%20Man%20Solution!5e0!3m2!1sen!2szm!4v1762627126496!5m2!1sen!2szm" loading="lazy"></iframe>
     </div>
 
     <!-- Center: Step Navbar -->
-    <div style="flex:0.3; display:flex; flex-direction:column; justify-content:flex-start; gap:20px;">
-      <h3 style="text-align:center;color:#0078d7;">Steps</h3>
-      <div id="stepsNav" style="display:flex; flex-direction:column; gap:10px;">
-        <button class="step-btn active" data-step="1">1. Personal Details</button>
-        <button class="step-btn" data-step="2">2. Service Details</button>
-        <button class="step-btn" data-step="3">3. Date & Notes</button>
+    <div class="modal-center">
+      <h3><i data-feather="list"></i> Steps</h3>
+      <div id="stepsNav">
+        <button class="step-btn active" data-step="1"><i data-feather="user"></i> Personal Details</button>
+        <button class="step-btn" data-step="2"><i data-feather="file-text"></i> Service Details</button>
+        <button class="step-btn" data-step="3"><i data-feather="calendar"></i> Date & Notes</button>
       </div>
     </div>
 
     <!-- Right: Step Form -->
-    <div style="flex:1;">
-      <span class="modal-close" id="closeAppointmentModal">&times;</span>
-      <h2 style="text-align:center;color:#0078d7;">Book Appointment</h2>
+    <div class="modal-right">
+      <span class="modal-close" id="closeAppointmentModal"><i data-feather="x"></i></span>
+      <h2><i data-feather="edit"></i> Book Appointment</h2>
       <div id="stepForms">
 
-        <!-- Step 1: Personal Details -->
+        <!-- Step 1 -->
         <div class="step-form active">
-          <input type="text" id="patientName" placeholder="Full Name" />
-          <input type="email" id="patientEmail" placeholder="Email Address" />
-          <input type="tel" id="patientPhone" placeholder="Phone Number" />
-          <button class="commitment-btn" data-next="2">Next</button>
+          <div class="input-wrapper"><i data-feather="user"></i><input type="text" id="patientName" placeholder="Full Name" /></div>
+          <div class="input-wrapper"><i data-feather="mail"></i><input type="email" id="patientEmail" placeholder="Email Address" /></div>
+          <div class="input-wrapper"><i data-feather="phone"></i><input type="tel" id="patientPhone" placeholder="Phone Number" /></div>
+          <button class="commitment-btn" data-next="2"><i data-feather="arrow-right"></i> Next</button>
         </div>
 
-        <!-- Step 2: Service Details -->
+        <!-- Step 2 -->
         <div class="step-form">
-          <select id="serviceType">
-            <option value="">Select Service</option>
-            <option>Consultation</option>
-            <option>Cleaning</option>
-            <option>Filling</option>
-            <option>Extraction</option>
-          </select>
-          <textarea id="serviceNotes" placeholder="Describe your concern..." rows="4"></textarea>
-          <div style="display:flex; gap:10px; margin-top:10px;">
-            <button class="commitment-btn" data-prev="1">Back</button>
-            <button class="commitment-btn" data-next="3">Next</button>
+          <div class="input-wrapper"><i data-feather="tool"></i>
+            <select id="serviceType">
+              <option value="">Select Service</option>
+              <option>Consultation</option>
+              <option>Cleaning</option>
+              <option>Filling</option>
+              <option>Extraction</option>
+            </select>
+          </div>
+          <div class="input-wrapper"><i data-feather="file-text"></i><textarea id="serviceNotes" placeholder="Describe your concern..." rows="4"></textarea></div>
+          <div class="step-btns">
+            <button class="commitment-btn" data-prev="1"><i data-feather="arrow-left"></i> Back</button>
+            <button class="commitment-btn" data-next="3"><i data-feather="arrow-right"></i> Next</button>
           </div>
         </div>
 
-        <!-- Step 3: Date & Notes -->
+        <!-- Step 3 -->
         <div class="step-form">
-          <input type="date" id="appointmentDate" />
-          <input type="time" id="appointmentTime" />
-          <textarea id="additionalNotes" placeholder="Additional Notes..." rows="3"></textarea>
-          <div style="display:flex; gap:10px; margin-top:10px;">
-            <button class="commitment-btn" data-prev="2">Back</button>
-            <button class="commitment-btn" id="submitAppointment">Submit</button>
+          <div class="input-wrapper"><i data-feather="calendar"></i><input type="date" id="appointmentDate" /></div>
+          <div class="input-wrapper"><i data-feather="clock"></i><input type="time" id="appointmentTime" /></div>
+          <div class="input-wrapper"><i data-feather="edit-3"></i><textarea id="additionalNotes" placeholder="Additional Notes..." rows="3"></textarea></div>
+          <div class="step-btns">
+            <button class="commitment-btn" data-prev="2"><i data-feather="arrow-left"></i> Back</button>
+            <button class="commitment-btn" id="submitAppointment"><i data-feather="check"></i> Submit</button>
           </div>
         </div>
 
       </div>
     </div>
+
   </div>
 </div>
 
 
 
 <script>
+  feather.replace();
 // Modal logic
 const appointmentModal = document.getElementById('appointmentModal');
 const bookAppointmentBtn = document.getElementById('bookAppointmentBtn');
