@@ -165,6 +165,23 @@ footer{
 </head>
 <body>
 
+!-- Arrow Toggle -->
+<div id="sidebarToggle" style="
+  position:fixed;
+  left:0;
+  top:50%;
+  transform:translateY(-50%);
+  background:var(--primary);
+  color:#fff;
+  padding:10px;
+  border-top-right-radius:8px;
+  border-bottom-right-radius:8px;
+  cursor:pointer;
+  z-index:2100;
+">
+  <i data-feather="chevron-right"></i>
+</div>
+
 <!-- Sidebar -->
 <div class="sidebar" id="sidebar">
   <span class="close-btn" id="closeSidebar">&times;</span>
@@ -195,17 +212,17 @@ footer{
   <!-- Cards / Services -->
   <section class="cards" id="services">
     <div class="card">
-      <img src="checkups.png" alt="Checkup">
+      <img src="checkups.jpg" alt="Checkup">
       <h3>Dental Checkups</h3>
       <p>Comprehensive oral examinations to ensure healthy teeth and gums.</p>
     </div>
     <div class="card">
-      <img src="cosmetic.png" alt="Cosmetic">
+      <img src="cosmetic.jpg" alt="Cosmetic">
       <h3>Cosmetic Dentistry</h3>
       <p>Enhance your smile with whitening, veneers, and aesthetic treatments.</p>
     </div>
     <div class="card">
-      <img src="oral.png" alt="Surgery">
+      <img src="oral.jpg" alt="Surgery">
       <h3>Oral Surgery</h3>
       <p>Professional surgical care for complex dental procedures.</p>
     </div>
@@ -236,13 +253,27 @@ footer{
 feather.replace();
 
 // Sidebar toggle
-const menuBtn = document.getElementById('menuBtn');
+ 
 const sidebar = document.getElementById('sidebar');
-const closeSidebar = document.getElementById('closeSidebar');
+ 
 const main = document.getElementById('main');
 
-menuBtn.onclick = ()=>{ sidebar.classList.add('show'); main.classList.add('shift'); }
-closeSidebar.onclick = ()=>{ sidebar.classList.remove('show'); main.classList.remove('shift'); }
+  const sidebarToggle = document.getElementById('sidebarToggle');
+sidebarToggle.onclick = () => {
+  sidebar.classList.toggle('show');
+  main.classList.toggle('shift');
+
+  // Swap arrow direction
+  const icon = sidebarToggle.querySelector('i');
+  if(sidebar.classList.contains('show')){
+    icon.dataset.feather = 'chevron-left';
+  } else {
+    icon.dataset.feather = 'chevron-right';
+  }
+  feather.replace();
+};
+
+ 
 
 // ===== Mock Chart Data =====
 const months = ['Jan','Feb','Mar','Apr','May','Jun'];
