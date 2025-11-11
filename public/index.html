@@ -544,7 +544,11 @@ footer{
 .escalation a:hover {
   background: #00345d;
 }
-
+.assistant-dropdown { margin-left:10px; }
+.suggestions { display:flex; flex-wrap:wrap; padding:5px; gap:5px; }
+.suggestion-chip { padding:5px 10px; background:#00bfa5; color:white; border:none; border-radius:15px; cursor:pointer; }
+.live-escalation { display:flex; gap:10px; margin-top:5px; }
+.live-escalation button { flex:1; background:#00bfa5; color:white; border:none; border-radius:5px; padding:5px; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -671,15 +675,6 @@ const chatInput = document.getElementById("chat-input");
 const typing = document.getElementById("typing-indicator");
 const suggestionsDiv = document.getElementById("suggestions");
 
-const commonQuestions = [
-  "What are your clinic hours?",
-  "Do you accept insurance?",
-  "How much does a dental cleaning cost?",
-  "Book an appointment",
-  "Emergency services",
-  "Who are your dentists?"
-];
-
 // ========================
 // Load knowledge.json
 // ========================
@@ -687,11 +682,28 @@ async function loadKnowledge() {
   try {
     const res = await fetch('knowledge.json');
     knowledge = await res.json();
+    addGreeting();
   } catch (err) {
     console.error('Failed to load knowledge.json', err);
   }
 }
 loadKnowledge();
+
+// ========================
+// Greetings
+// ========================
+function addGreeting() {
+  const hour = new Date().getHours();
+  let greeting = "Hello!";
+  if (hour < 12) greeting = "Good morning!";
+  else if (hour < 18) greeting = "Good afternoon!";
+  else greeting = "Good evening!";
+
+  const userName = localStorage.getItem("userName") || "there";
+  addMessage(`${greeting} ${userName}! I'm ${knowledge?.ai_persona?.name || "SmartDent Assistant"}. You can ask me about our clinic, services, dental tips, or anything else.`, "bot");
+
+  addMessage("💡 Suggested prompts:\n- Clinic hours\n- Dental services\n- Book an appointment\n- Insurance & billing\n- Emergency procedures\n- Oral hygiene tips", "bot");
+}
 
 // ========================
 // Toggle chat window
@@ -718,7 +730,7 @@ function queryKnowledge(input) {
   const text = input.toLowerCase();
 
   // Clinic info
-  if (text.includes("clinic info") || text.includes("location") || text.includes("hours") || text.includes("contact")) {
+  if (text.includes("clinic") || text.includes("location") || text.includes("hours") || text.includes("contact")) {
     const info = knowledge.clinic_info;
     return `🏥 ${info.name} is located in ${info.location}.\n📞 ${info.contact.phone}\n✉️ ${info.contact.email}\n🌐 ${info.contact.website}\n🕒 Hours: Mon-Fri ${info.hours.monday_friday}, Sat ${info.hours.saturday}, Sun ${info.hours.sunday}\n💡 Mission: ${info.mission}`;
   }
@@ -780,6 +792,17 @@ function addSystemMessage(msg) {
 // ========================
 // Chat auto-suggestions
 // ========================
+const commonQuestions = [
+  "What are your clinic hours?",
+  "Do you accept insurance?",
+  "How much does a dental cleaning cost?",
+  "Book an appointment",
+  "Emergency services",
+  "Who are your dentists?",
+  "Oral hygiene tips",
+  "Payment methods"
+];
+
 function showSuggestions() {
   suggestionsDiv.innerHTML = '';
   commonQuestions.forEach(q => {
@@ -802,6 +825,7 @@ async function replyMessage(query) {
   typing.style.display = "flex";
   let response = queryKnowledge(query);
 
+  // AI fallback
   if (!response && assistantMode === 'ai') {
     try {
       const res = await fetch('/api/openai', {
@@ -852,8 +876,7 @@ function addLiveEscalation() {
 // Persistent chat memory
 // ========================
 function saveChatHistory() {
-  const history = chatLog.innerHTML;
-  localStorage.setItem('chatHistory', history);
+  localStorage.setItem('chatHistory', chatLog.innerHTML);
 }
 
 function loadChatHistory() {
@@ -869,6 +892,13 @@ chatForm.addEventListener("submit", e => {
   e.preventDefault();
   const text = chatInput.value.trim();
   if (!text) return;
+
+  // Save username if first message
+  if (!localStorage.getItem("userName") && text.toLowerCase().startsWith("hi ") || text.toLowerCase().startsWith("hello ")) {
+    const name = text.split(" ")[1];
+    if (name) localStorage.setItem("userName", name);
+  }
+
   addMessage(text, "user");
   chatInput.value = "";
   replyMessage(text);
