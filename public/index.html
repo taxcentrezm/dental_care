@@ -437,6 +437,71 @@ footer{
       }
       .floating-avatar { width: 60px; height: 60px; }
     }
+    .agent-select {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.assistant-dropdown {
+  background: #f8ffff;
+  color: #004f4f;
+  border: 1px solid #00bfa6;
+  border-radius: 8px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  user-select: none;
+}
+
+.assistant-dropdown:hover {
+  background: #e6fffa;
+  border-color: #00a894;
+}
+
+.assistant-dropdown .chevron {
+  margin-left: auto;
+  width: 16px;
+}
+
+.assistant-menu {
+  position: absolute;
+  top: 42px;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #00bfa6;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  list-style: none;
+  padding: 5px 0;
+  display: none;
+  z-index: 10;
+  width: 210px;
+}
+
+.assistant-menu.show {
+  display: block;
+}
+
+.assistant-menu li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  color: #004f4f;
+  transition: background 0.3s ease;
+}
+
+.assistant-menu li:hover {
+  background: #e6fffa;
+}
+
 </style>
 </head>
 <body>
@@ -531,9 +596,24 @@ footer{
   <div class="chat-window" id="chat-window">
     <div class="chat-header" id="chat-header">
       <span>SmartDent Assistant</span>
-      <div class="agent-select" id="agent-select">
-        <span id="agent-name">Generic Assistant</span>
-      </div>
+      <!-- Assistant Mode Selector -->
+<div class="agent-select" id="agent-select">
+  <div class="assistant-dropdown" id="assistantDropdown" onclick="toggleAssistantMenu()">
+    <i data-feather="cpu"></i>
+    <span id="assistant-label">Generic Assistant</span>
+    <i data-feather="chevron-down" class="chevron"></i>
+  </div>
+
+  <ul class="assistant-menu" id="assistantMenu">
+    <li onclick="setAssistantMode('generic')">
+      <i data-feather="cpu"></i> Generic Assistant
+    </li>
+    <li onclick="setAssistantMode('ai')">
+      <i data-feather="zap"></i> AI Assistant (OpenAI)
+    </li>
+  </ul>
+</div>
+
       <button onclick="toggleChat()" style="background:none;border:none;color:white;font-size:16px;">×</button>
     </div>
     <div class="chat-log" id="chat-log">
@@ -549,6 +629,8 @@ footer{
   </div>
   
 <script>
+
+  
     // ========================
     // TOGGLE CHAT VISIBILITY
     // ========================
@@ -556,6 +638,50 @@ footer{
       const chat = document.getElementById("chat-window");
       chat.style.display = (chat.style.display === "flex") ? "none" : "flex";
     }
+  let assistantMode = "generic";
+
+function toggleAssistantMenu() {
+  document.getElementById("assistantMenu").classList.toggle("show");
+}
+
+function setAssistantMode(mode) {
+  assistantMode = mode;
+  const label = document.getElementById("assistant-label");
+  const dropdown = document.getElementById("assistantDropdown");
+  const menu = document.getElementById("assistantMenu");
+
+  if (mode === "generic") {
+    label.textContent = "Generic Assistant";
+    dropdown.querySelector("i[data-feather]").setAttribute("data-feather", "cpu");
+    addSystemMessage("🧠 Switched to Generic Assistant — using local dataset.");
+  } else {
+    label.textContent = "AI Assistant (OpenAI)";
+    dropdown.querySelector("i[data-feather]").setAttribute("data-feather", "zap");
+    addSystemMessage("⚡ Switched to AI Assistant — powered by OpenAI.");
+  }
+
+  menu.classList.remove("show");
+  feather.replace(); // refresh icons
+}
+
+function addSystemMessage(msg) {
+  const chatLog = document.getElementById("chat-log");
+  const sysMsg = document.createElement("div");
+  sysMsg.className = "chat-message system-message";
+  sysMsg.textContent = msg;
+  chatLog.appendChild(sysMsg);
+  chatLog.scrollTop = chatLog.scrollHeight;
+}
+
+// Close dropdown if clicking outside
+document.addEventListener("click", (e) => {
+  const menu = document.getElementById("assistantMenu");
+  const dropdown = document.getElementById("assistantDropdown");
+  if (!dropdown.contains(e.target)) {
+    menu.classList.remove("show");
+  }
+});
+
 
     const chatLog = document.getElementById("chat-log");
     const chatForm = document.getElementById("chat-form");
