@@ -275,6 +275,168 @@ footer{
 
 @media(max-width:1200px){ .modal-content { flex-direction: column; } .modal-left, .modal-right, .modal-center { width:100%; } }
 </style>
+  <style>
+  /* Floating Avatar */
+    .floating-avatar-wrapper {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      z-index: 1000;
+    }
+
+    .floating-avatar {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--teal);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transition: transform 0.3s ease;
+    }
+
+    .floating-avatar:hover {
+      transform: scale(1.1) rotate(5deg);
+    }
+
+    .hover-greeting {
+      background: var(--teal);
+      color: var(--white);
+      padding: 10px 15px;
+      border-radius: 20px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .floating-avatar-wrapper:hover .hover-greeting {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Chat Window */
+    .chat-window {
+      position: fixed;
+      bottom: 110px;
+      right: 25px;
+      width: 320px;
+      max-height: 450px;
+      background: var(--white);
+      border: 1px solid #ccc;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 999;
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .chat-header {
+      background: var(--teal);
+      color: var(--white);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 15px;
+      font-weight: 600;
+    }
+
+    .chat-log {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .message {
+      padding: 10px 14px;
+      border-radius: 14px;
+      max-width: 80%;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .bot {
+      background: #e6f8f8;
+      align-self: flex-start;
+      border: 1px solid var(--teal);
+    }
+
+    .user {
+      background: var(--teal);
+      color: var(--white);
+      align-self: flex-end;
+    }
+
+    #chat-form {
+      display: flex;
+      border-top: 1px solid #ddd;
+    }
+
+    #chat-input {
+      flex: 1;
+      border: none;
+      padding: 12px;
+      outline: none;
+      font-size: 0.9rem;
+    }
+
+    #chat-form button {
+      background: var(--teal);
+      color: var(--white);
+      border: none;
+      padding: 12px 16px;
+      cursor: pointer;
+    }
+
+    .typing-indicator {
+      display: none;
+      justify-content: flex-start;
+      align-items: center;
+      padding-left: 10px;
+      margin-bottom: 8px;
+    }
+
+    .typing-indicator span {
+      width: 6px;
+      height: 6px;
+      background: var(--teal);
+      border-radius: 50%;
+      margin-right: 4px;
+      animation: blink 1.4s infinite;
+    }
+
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes blink {
+      0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+      40% { opacity: 1; transform: scale(1); }
+    }
+
+    @media (max-width: 600px) {
+      .chat-window {
+        width: 90%;
+        right: 5%;
+        bottom: 100px;
+      }
+      .floating-avatar { width: 60px; height: 60px; }
+    }
+</style>
 </head>
 <body>
 
@@ -307,7 +469,7 @@ footer{
 <!-- Main -->
 <div class="main" id="main">
   <header>
-    <h1>Dr -----</h1>
+    <h1>Dental Solutions Zambia</h1>
   </header>
 
   <!-- Hero -->
@@ -357,8 +519,106 @@ footer{
       <canvas id="servicesChart"></canvas>
     </div>
   </section>
+  
+ <!-- Floating Avatar -->
+  <div class="floating-avatar-wrapper">
+    <img src="avatar.gif" alt="Assistant Avatar" class="floating-avatar" onclick="toggleChat()" />
+    <div class="hover-greeting">👋 Hey there! I'm <b>SmartDent</b></div>
+  </div>
 
+  <!-- Chat Window -->
+  <div class="chat-window" id="chat-window">
+    <div class="chat-header" id="chat-header">
+      <span>SmartDent Assistant</span>
+      <div class="agent-select" id="agent-select">
+        <span id="agent-name">Generic Assistant</span>
+      </div>
+      <button onclick="toggleChat()" style="background:none;border:none;color:white;font-size:16px;">×</button>
+    </div>
+    <div class="chat-log" id="chat-log">
+      <div class="message bot">👋 Hi! I’m SmartDent. How can I help you today?</div>
+    </div>
+    <div class="typing-indicator" id="typing-indicator">
+      <span></span><span></span><span></span>
+    </div>
+    <form id="chat-form">
+      <input type="text" id="chat-input" placeholder="Ask me anything..." autocomplete="off" />
+      <button type="submit">Send</button>
+    </form>
+  </div>
+  
+<script>
+    // ========================
+    // TOGGLE CHAT VISIBILITY
+    // ========================
+    function toggleChat() {
+      const chat = document.getElementById("chat-window");
+      chat.style.display = (chat.style.display === "flex") ? "none" : "flex";
+    }
 
+    const chatLog = document.getElementById("chat-log");
+    const chatForm = document.getElementById("chat-form");
+    const chatInput = document.getElementById("chat-input");
+    const typing = document.getElementById("typing-indicator");
+    const agentName = document.getElementById("agent-name");
+
+    // ========================
+    // DATASET
+    // ========================
+    const dataset = [
+      { q: "leave policy", a: "Employees can apply for leave via the HR portal under ‘My Requests’ → ‘New Leave’." },
+      { q: "salary", a: "Salaries are processed on the 25th of each month." },
+      { q: "location", a: "We’re located in Kabwe near the Civic Centre." },
+      { q: "contact", a: "You can reach us at +260 97 000 0000 or email info@smartdentzm.com." },
+      { q: "appointment", a: "You can schedule an appointment using the WhatsApp link: wa.me/260970000000." },
+      { q: "research", a: "You can access research data in the Resources tab of your ERP dashboard." },
+      { q: "live", a: "Connecting you to a human assistant — please use the WhatsApp or Email links below." }
+    ];
+
+    // ========================
+    // MESSAGE HANDLING
+    // ========================
+    function addMessage(text, sender = "bot") {
+      const msg = document.createElement("div");
+      msg.classList.add("message", sender);
+      msg.textContent = text;
+      chatLog.appendChild(msg);
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    async function replyMessage(query) {
+      typing.style.display = "flex";
+      const lower = query.toLowerCase();
+      let response = null;
+
+      // local match
+      for (const item of dataset) {
+        if (lower.includes(item.q)) { response = item.a; break; }
+      }
+
+      if (!response && lower.includes("openai mode")) {
+        agentName.textContent = "Precision Mode (OpenAI)";
+        response = "Switched to AI precision mode. Please provide your query.";
+      }
+
+      if (!response) {
+        response = "Hmm… I’m not sure, but I can connect you to a live assistant on WhatsApp or via email.";
+      }
+
+      await new Promise(r => setTimeout(r, 800));
+      typing.style.display = "none";
+      addMessage(response, "bot");
+    }
+
+    chatForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const text = chatInput.value.trim();
+      if (!text) return;
+      addMessage(text, "user");
+      chatInput.value = "";
+      replyMessage(text);
+    });
+  </script>
 <!-- Three-Sided Appointment Modal -->
 <div id="appointmentModal" class="modal">
   <div class="modal-content">
