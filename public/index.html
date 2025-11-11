@@ -523,7 +523,8 @@ footer{
 .suggestion-chip:hover {
   background: #00796b;
 }
-
+.typing-indicator { display:none; }
+    
 /* Escalation buttons */
 .escalation {
   display: flex;
@@ -699,10 +700,38 @@ function addGreeting() {
   else if (hour < 18) greeting = "Good afternoon!";
   else greeting = "Good evening!";
 
-  const userName = localStorage.getItem("userName") || "there";
-  addMessage(`${greeting} ${userName}! I'm ${knowledge?.ai_persona?.name || "SmartDent Assistant"}. You can ask me about our clinic, services, dental tips, or anything else.`, "bot");
+  const assistantName = knowledge?.ai_persona?.name || "SmartDent Assistant";
+  
+  // Greeting without username
+  addMessage(`${greeting}! I'm ${assistantName}. You can ask me about our clinic, services, dental tips, or anything else.`, "bot");
 
-  addMessage("💡 Suggested prompts:\n- Clinic hours\n- Dental services\n- Book an appointment\n- Insurance & billing\n- Emergency procedures\n- Oral hygiene tips", "bot");
+  // Suggested prompts as clickable chips
+  const suggestedPrompts = [
+    "Clinic hours",
+    "Dental services",
+    "Book an appointment",
+    "Insurance & billing",
+    "Emergency procedures",
+    "Oral hygiene tips"
+  ];
+
+  const chipContainer = document.createElement("div");
+  chipContainer.className = "chip-container";
+
+  suggestedPrompts.forEach(prompt => {
+    const chip = document.createElement("button");
+    chip.className = "chip";
+    chip.textContent = prompt;
+    chip.onclick = () => {
+      addMessage(prompt, "user");
+      replyMessage(prompt);
+    };
+    chipContainer.appendChild(chip);
+  });
+
+  const chatLog = document.getElementById("chat-log");
+  chatLog.appendChild(chipContainer);
+  chatLog.scrollTop = chatLog.scrollHeight;
 }
 
 // ========================
