@@ -661,145 +661,218 @@ footer{
 </div>
 <script>feather.replace();</script>
 <script>
-let assistantMode = "generic";
-let knowledge = {};
+feather.replace();
 
-const chatWindow = document.getElementById("chat-window");
+let knowledge = null;
+let assistantMode = "generic";
 const chatLog = document.getElementById("chat-log");
+const chatForm = document.getElementById("chat-form");
 const chatInput = document.getElementById("chat-input");
 const typing = document.getElementById("typing-indicator");
-const form = document.getElementById("chat-form");
-const modeSelect = document.getElementById("assistant-mode");
-const suggestionsContainer = document.getElementById("suggestions");
+const suggestionsDiv = document.getElementById("suggestions");
 
-// Load localStorage memory and knowledge
-window.addEventListener("load", async () => {
-  const savedChat = localStorage.getItem("smartdentChat");
-  if (savedChat) chatLog.innerHTML = savedChat;
-  else addMessage("👋 Hello! I'm SmartDent, your dental assistant. How can I help today?", "bot");
+const commonQuestions = [
+  "What are your clinic hours?",
+  "Do you accept insurance?",
+  "How much does a dental cleaning cost?",
+  "Book an appointment",
+  "Emergency services",
+  "Who are your dentists?"
+];
 
-  const res = await fetch("knowledge.json");
-  knowledge = await res.json();
-  showSuggestions();
-});
+// ========================
+// Load knowledge.json
+// ========================
+async function loadKnowledge() {
+  try {
+    const res = await fetch('knowledge.json');
+    knowledge = await res.json();
+  } catch (err) {
+    console.error('Failed to load knowledge.json', err);
+  }
+}
+loadKnowledge();
 
-// Save chat
-function saveChat() { localStorage.setItem("smartdentChat", chatLog.innerHTML); }
-
+// ========================
 // Toggle chat window
+// ========================
 function toggleChat() {
-  chatWindow.style.display = chatWindow.style.display === "flex" ? "none" : "flex";
+  const chat = document.getElementById("chat-window");
+  chat.style.display = (chat.style.display === "flex") ? "none" : "flex";
 }
 
-// Add message
-function addMessage(text, sender, options = {}) {
-  const msg = document.createElement("div");
-  msg.className = "message " + sender;
-  msg.textContent = text;
-
-  // Optional HTML insertion
-  if (options.html) msg.innerHTML = options.html;
-
-  chatLog.appendChild(msg);
-  chatLog.scrollTop = chatLog.scrollHeight;
-  saveChat();
+// ========================
+// Set assistant mode
+// ========================
+function setAssistantMode(mode) {
+  assistantMode = mode;
+  document.getElementById("assistant-label").textContent = mode === 'ai' ? 'AI Assistant (OpenAI)' : 'Generic Assistant';
+  addSystemMessage(mode === 'ai' ? "⚡ Switched to AI Assistant — powered by OpenAI." : "🧠 Switched to Generic Assistant — using local dataset.");
 }
 
-// Show auto-suggestions
-function showSuggestions() {
-  suggestionsContainer.innerHTML = "";
-  knowledge.faq.forEach(f => {
-    const chip = document.createElement("div");
-    chip.className = "suggestion-chip";
-    chip.textContent = f.question;
-    chip.onclick = () => {
-      chatInput.value = f.question;
-      chatForm.dispatchEvent(new Event('submit'));
-    };
-    suggestionsContainer.appendChild(chip);
-  });
-}
-
-// Handle query
-async function handleQuery(q) {
-  const query = q.toLowerCase();
+// ========================
+// Local knowledge query
+// ========================
+function queryKnowledge(input) {
+  if (!knowledge) return null;
+  const text = input.toLowerCase();
 
   // Clinic info
-  if (query.includes("location")) return `📍 We are located in ${knowledge.clinic_info.location}.`;
-  if (query.includes("contact")) return `☎️ Phone: ${knowledge.clinic_info.contact.phone}\n📧 Email: ${knowledge.clinic_info.contact.email}`;
+  if (text.includes("clinic info") || text.includes("location") || text.includes("hours") || text.includes("contact")) {
+    const info = knowledge.clinic_info;
+    return `🏥 ${info.name} is located in ${info.location}.\n📞 ${info.contact.phone}\n✉️ ${info.contact.email}\n🌐 ${info.contact.website}\n🕒 Hours: Mon-Fri ${info.hours.monday_friday}, Sat ${info.hours.saturday}, Sun ${info.hours.sunday}\n💡 Mission: ${info.mission}`;
+  }
 
   // Services
-  const service = knowledge.services.find(s => query.includes(s.name.toLowerCase().split(" ")[0]));
-  if (service) return `${service.name}: ${service.description} (${service.price_range}, ${service.duration_minutes} min).`;
+  if (text.includes("services") || text.includes("treatment") || text.includes("procedure")) {
+    return knowledge.services.map(s => `• ${s.name}: ${s.description} (${s.price_range}, ${s.duration_minutes} mins)`).join('\n');
+  }
 
   // FAQ
-  const faq = knowledge.faq.find(f => query.includes(f.question.toLowerCase().split(" ")[1]));
-  if (faq) return faq.answer;
+  for (const faq of knowledge.faq) {
+    if (text.includes(faq.question.toLowerCase().replace(/\?/, ''))) return faq.answer;
+  }
 
   // Treatment advice
-  for (const [condition, advice] of Object.entries(knowledge.treatment_advice)) {
-    if (query.includes(condition)) return `🦷 ${advice}`;
+  for (const key in knowledge.treatment_advice) {
+    if (text.includes(key)) return knowledge.treatment_advice[key];
   }
 
   // Billing
-  if (query.includes("payment") || query.includes("price"))
-    return `💳 We accept ${knowledge.billing.payment_methods.join(", ")}. Currency: ${knowledge.billing.currency}.`;
+  if (text.includes("payment") || text.includes("billing") || text.includes("price") || text.includes("cost")) {
+    const b = knowledge.billing;
+    return `💰 Payment methods: ${b.payment_methods.join(', ')}.\nCurrency: ${b.currency}, Tax rate: ${b.tax_rate*100}%\nDiscount: ${b.discount_policy}`;
+  }
 
-  // Fallback
-  if (assistantMode === "ai") {
-    return await askOpenAI(q);
-  } else {
-    // Show escalation buttons
-    return {
-      html: `
-        I’m not sure about that, but you can contact us directly:<br>
-        <div class="escalation">
-          <a href="https://wa.me/260571544364" target="_blank">WhatsApp</a>
-          <a href="mailto:info@smaitdev.com">Email</a>
-        </div>
-      `
+  // Team info
+  if (text.includes("doctor") || text.includes("team") || text.includes("dentist")) {
+    return knowledge.clinic_team.map(t => `• ${t.name} — ${t.title}, ${t.specialization} (${t.experience_years} yrs)`).join('\n');
+  }
+
+  return null;
+}
+
+// ========================
+// Add message
+// ========================
+function addMessage(text, sender="bot") {
+  const msg = document.createElement("div");
+  msg.classList.add("message", sender);
+  msg.textContent = text;
+  chatLog.appendChild(msg);
+  chatLog.scrollTop = chatLog.scrollHeight;
+
+  // Save chat history
+  saveChatHistory();
+}
+
+// ========================
+// Add system message
+// ========================
+function addSystemMessage(msg) {
+  const sysMsg = document.createElement("div");
+  sysMsg.className = "chat-message system-message";
+  sysMsg.textContent = msg;
+  chatLog.appendChild(sysMsg);
+  chatLog.scrollTop = chatLog.scrollHeight;
+}
+
+// ========================
+// Chat auto-suggestions
+// ========================
+function showSuggestions() {
+  suggestionsDiv.innerHTML = '';
+  commonQuestions.forEach(q => {
+    const chip = document.createElement("button");
+    chip.className = "suggestion-chip";
+    chip.textContent = q;
+    chip.onclick = () => {
+      chatInput.value = q;
+      chatForm.dispatchEvent(new Event('submit'));
     };
+    suggestionsDiv.appendChild(chip);
+  });
+}
+showSuggestions();
+
+// ========================
+// Reply message
+// ========================
+async function replyMessage(query) {
+  typing.style.display = "flex";
+  let response = queryKnowledge(query);
+
+  if (!response && assistantMode === 'ai') {
+    try {
+      const res = await fetch('/api/openai', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ prompt: query })
+      });
+      const data = await res.json();
+      response = data.answer || null;
+    } catch(err) {
+      console.error(err);
+    }
+  }
+
+  typing.style.display = "none";
+
+  if (!response) {
+    response = "🤔 I'm not sure. You can contact us via WhatsApp or Email:";
+    addMessage(response, "bot");
+    addLiveEscalation();
+  } else {
+    addMessage(response, "bot");
   }
 }
 
-// AI mode backend
-async function askOpenAI(prompt) {
-  try {
-    const res = await fetch('/api/openai', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ prompt: userQuery })
-});
-    const data = await res.json();
-    return data.answer || "AI mode unavailable.";
-  } catch {
-    return "AI service not reachable.";
-  }
+// ========================
+// Live escalation buttons
+// ========================
+function addLiveEscalation() {
+  const container = document.createElement("div");
+  container.className = "live-escalation";
+
+  const wa = document.createElement("button");
+  wa.textContent = "WhatsApp";
+  wa.onclick = () => window.open("https://wa.me/260978555321", "_blank");
+
+  const mail = document.createElement("button");
+  mail.textContent = "Email";
+  mail.onclick = () => window.location.href = "mailto:info@brightsmileclinic.com";
+
+  container.appendChild(wa);
+  container.appendChild(mail);
+  chatLog.appendChild(container);
+  chatLog.scrollTop = chatLog.scrollHeight;
 }
 
-// Form submit
-form.addEventListener("submit", async e => {
+// ========================
+// Persistent chat memory
+// ========================
+function saveChatHistory() {
+  const history = chatLog.innerHTML;
+  localStorage.setItem('chatHistory', history);
+}
+
+function loadChatHistory() {
+  const history = localStorage.getItem('chatHistory');
+  if (history) chatLog.innerHTML = history;
+}
+loadChatHistory();
+
+// ========================
+// Form submission
+// ========================
+chatForm.addEventListener("submit", e => {
   e.preventDefault();
   const text = chatInput.value.trim();
   if (!text) return;
   addMessage(text, "user");
   chatInput.value = "";
-  typing.style.display = "flex";
-
-  await new Promise(r => setTimeout(r, 500));
-  const response = await handleQuery(text);
-  typing.style.display = "none";
-
-  if (typeof response === "string") addMessage(response, "bot");
-  else addMessage("", "bot", { html: response.html });
+  replyMessage(text);
 });
-
-// Switch assistant mode
-modeSelect.addEventListener("change", e => {
-  assistantMode = e.target.value;
-  addMessage(assistantMode === "ai" ? "🤖 AI Mode activated." : "🧠 Generic mode active.", "bot");
-});
-
 </script>
 
 <!-- Three-Sided Appointment Modal -->
