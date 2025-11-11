@@ -629,123 +629,165 @@ footer{
   </div>
   
 <script>
+  // ========================
+  // TOGGLE CHAT VISIBILITY
+  // ========================
+  function toggleChat() {
+    const chat = document.getElementById("chat-window");
+    chat.style.display = chat.style.display === "flex" ? "none" : "flex";
+  }
 
-  
-    // ========================
-    // TOGGLE CHAT VISIBILITY
-    // ========================
-    function toggleChat() {
-      const chat = document.getElementById("chat-window");
-      chat.style.display = (chat.style.display === "flex") ? "none" : "flex";
-    }
   let assistantMode = "generic";
 
-function toggleAssistantMenu() {
-  document.getElementById("assistantMenu").classList.toggle("show");
-}
-
-function setAssistantMode(mode) {
-  assistantMode = mode;
-  const label = document.getElementById("assistant-label");
-  const dropdown = document.getElementById("assistantDropdown");
-  const menu = document.getElementById("assistantMenu");
-
-  if (mode === "generic") {
-    label.textContent = "Generic Assistant";
-    dropdown.querySelector("i[data-feather]").setAttribute("data-feather", "cpu");
-    addSystemMessage("🧠 Switched to Generic Assistant — using local dataset.");
-  } else {
-    label.textContent = "AI Assistant (OpenAI)";
-    dropdown.querySelector("i[data-feather]").setAttribute("data-feather", "zap");
-    addSystemMessage("⚡ Switched to AI Assistant — powered by OpenAI.");
+  function toggleAssistantMenu() {
+    document.getElementById("assistantMenu").classList.toggle("show");
   }
 
-  menu.classList.remove("show");
-  feather.replace(); // refresh icons
-}
+  function setAssistantMode(mode) {
+    assistantMode = mode;
+    const label = document.getElementById("assistant-label");
+    const dropdown = document.getElementById("assistantDropdown");
+    const menu = document.getElementById("assistantMenu");
 
-function addSystemMessage(msg) {
-  const chatLog = document.getElementById("chat-log");
-  const sysMsg = document.createElement("div");
-  sysMsg.className = "chat-message system-message";
-  sysMsg.textContent = msg;
-  chatLog.appendChild(sysMsg);
-  chatLog.scrollTop = chatLog.scrollHeight;
-}
+    if (mode === "generic") {
+      label.textContent = "Generic Assistant";
+      addSystemMessage("🧠 Switched to Generic Assistant — using built-in dataset.");
+    } else {
+      label.textContent = "AI Assistant (OpenAI)";
+      addSystemMessage("⚡ Switched to AI Assistant — powered by OpenAI.");
+    }
 
-// Close dropdown if clicking outside
-document.addEventListener("click", (e) => {
-  const menu = document.getElementById("assistantMenu");
-  const dropdown = document.getElementById("assistantDropdown");
-  if (!dropdown.contains(e.target)) {
+    // Safe icon update
+    const icon = dropdown.querySelector("i[data-feather]");
+    if (icon) {
+      icon.setAttribute("data-feather", mode === "generic" ? "cpu" : "zap");
+      feather.replace();
+    }
+
     menu.classList.remove("show");
   }
-});
 
-
+  function addSystemMessage(msg) {
     const chatLog = document.getElementById("chat-log");
-    const chatForm = document.getElementById("chat-form");
-    const chatInput = document.getElementById("chat-input");
-    const typing = document.getElementById("typing-indicator");
-    const agentName = document.getElementById("agent-name");
+    const sysMsg = document.createElement("div");
+    sysMsg.className = "chat-message system-message";
+    sysMsg.textContent = msg;
+    chatLog.appendChild(sysMsg);
+    chatLog.scrollTop = chatLog.scrollHeight;
+  }
 
-    // ========================
-    // DATASET
-    // ========================
-    const dataset = [
-      { q: "leave policy", a: "Employees can apply for leave via the HR portal under ‘My Requests’ → ‘New Leave’." },
-      { q: "salary", a: "Salaries are processed on the 25th of each month." },
-      { q: "location", a: "We’re located in Kabwe near the Civic Centre." },
-      { q: "contact", a: "You can reach us at +260 97 000 0000 or email info@smartdentzm.com." },
-      { q: "appointment", a: "You can schedule an appointment using the WhatsApp link: wa.me/260970000000." },
-      { q: "research", a: "You can access research data in the Resources tab of your ERP dashboard." },
-      { q: "live", a: "Connecting you to a human assistant — please use the WhatsApp or Email links below." }
-    ];
+  // Close dropdown if clicking outside
+  document.addEventListener("click", (e) => {
+    const menu = document.getElementById("assistantMenu");
+    const dropdown = document.getElementById("assistantDropdown");
+    if (!dropdown.contains(e.target)) {
+      menu.classList.remove("show");
+    }
+  });
 
-    // ========================
-    // MESSAGE HANDLING
-    // ========================
-    function addMessage(text, sender = "bot") {
-      const msg = document.createElement("div");
-      msg.classList.add("message", sender);
-      msg.textContent = text;
-      chatLog.appendChild(msg);
-      chatLog.scrollTop = chatLog.scrollHeight;
+  // ========================
+  // CHAT ELEMENTS
+  // ========================
+  const chatLog = document.getElementById("chat-log");
+  const chatForm = document.getElementById("chat-form");
+  const chatInput = document.getElementById("chat-input");
+  const typing = document.getElementById("typing-indicator");
+  const agentName = document.getElementById("agent-name");
+
+  // ========================
+  // DATASET
+  // ========================
+  const dataset = [
+    {
+      keywords: ["leave", "holiday", "day off"],
+      a: "Employees can apply for leave via the HR portal under ‘My Requests’ → ‘New Leave’."
+    },
+    {
+      keywords: ["salary", "pay", "payslip", "wage"],
+      a: "Salaries are processed on the 25th of each month, unless a weekend or holiday."
+    },
+    {
+      keywords: ["location", "address", "where"],
+      a: "We’re located in Kabwe, near the Civic Centre."
+    },
+    {
+      keywords: ["contact", "email", "phone"],
+      a: "You can reach us via WhatsApp at +260 97 000 0000 or email info@smartdentzm.com."
+    },
+    {
+      keywords: ["appointment", "book", "schedule"],
+      a: "You can schedule an appointment using the WhatsApp link: https://wa.me/260970000000"
+    },
+    {
+      keywords: ["research", "data", "analysis"],
+      a: "You can access research data in the Resources tab of your ERP dashboard."
+    },
+    {
+      keywords: ["live", "human", "help now"],
+      a: "Connecting you to a live assistant — please reach us on WhatsApp or Email below."
+    },
+    {
+      keywords: ["thank", "thanks", "appreciate"],
+      a: "You're most welcome 😊! I'm here to help anytime."
+    },
+    {
+      keywords: ["hi", "hello", "hey"],
+      a: "Hello there 👋! How can I assist you today?"
+    }
+  ];
+
+  // ========================
+  // MESSAGE HANDLING
+  // ========================
+  function addMessage(text, sender = "bot") {
+    const msg = document.createElement("div");
+    msg.classList.add("message", sender);
+    msg.textContent = text;
+    chatLog.appendChild(msg);
+    chatLog.scrollTop = chatLog.scrollHeight;
+  }
+
+  async function replyMessage(query) {
+    typing.style.display = "flex";
+    const lower = query.toLowerCase();
+    let response = null;
+
+    // Local dataset matching
+    for (const item of dataset) {
+      if (item.keywords.some(k => lower.includes(k))) {
+        response = item.a;
+        break;
+      }
     }
 
-    async function replyMessage(query) {
-      typing.style.display = "flex";
-      const lower = query.toLowerCase();
-      let response = null;
-
-      // local match
-      for (const item of dataset) {
-        if (lower.includes(item.q)) { response = item.a; break; }
-      }
-
-      if (!response && lower.includes("openai mode")) {
-        agentName.textContent = "Precision Mode (OpenAI)";
-        response = "Switched to AI precision mode. Please provide your query.";
-      }
-
-      if (!response) {
-        response = "Hmm… I’m not sure, but I can connect you to a live assistant on WhatsApp or via email.";
-      }
-
-      await new Promise(r => setTimeout(r, 800));
-      typing.style.display = "none";
-      addMessage(response, "bot");
+    // If AI Mode
+    if (assistantMode === "ai" && !response) {
+      response = "Let me analyze that... 🤔 (In AI mode, I can provide deeper insights if connected to OpenAI API.)";
     }
 
-    chatForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const text = chatInput.value.trim();
-      if (!text) return;
-      addMessage(text, "user");
-      chatInput.value = "";
-      replyMessage(text);
-    });
-  </script>
+    // Fallback generic
+    if (!response) {
+      response = "Hmm… I’m not sure, but I can connect you to a live assistant on WhatsApp or via email.";
+    }
+
+    await new Promise(r => setTimeout(r, 800));
+    typing.style.display = "none";
+    addMessage(response, "bot");
+  }
+
+  // ========================
+  // EVENT LISTENER
+  // ========================
+  chatForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const text = chatInput.value.trim();
+    if (!text) return;
+    addMessage(text, "user");
+    chatInput.value = "";
+    replyMessage(text);
+  });
+</script>
+
 <!-- Three-Sided Appointment Modal -->
 <div id="appointmentModal" class="modal">
   <div class="modal-content">
