@@ -62,6 +62,18 @@
     {
       "question": "Do tooth extractions hurt?",
       "answer": "Extractions are done under local anesthesia to ensure you don’t feel pain, though mild soreness may follow after the procedure."
+    },
+    {
+      "question": "Hi",
+      "answer": "Hello! 👋 Welcome to BrightSmile Dental Clinic. How can I assist you today?"
+    },
+    {
+      "question": "Hey",
+      "answer": "Hey there! 😄 How can I help you with your dental care today?"
+    },
+    {
+      "question": "Book appointment",
+      "answer": "You can book an appointment directly via WhatsApp: <a href='https://wa.me/260978555321' target='_blank'>Click here to book</a> or email us at info@brightsmileclinic.com."
     }
   ],
 
