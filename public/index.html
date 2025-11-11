@@ -765,11 +765,11 @@ async function handleQuery(q) {
 // AI mode backend
 async function askOpenAI(prompt) {
   try {
-    const res = await fetch("/api/openai", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt })
-    });
+    const res = await fetch('/api/openai', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ prompt: userQuery })
+});
     const data = await res.json();
     return data.answer || "AI mode unavailable.";
   } catch {
