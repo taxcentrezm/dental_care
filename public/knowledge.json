@@ -1,0 +1,120 @@
+{
+  "clinic_info": {
+    "name": "BrightSmile Dental Clinic",
+    "location": "Kabwe, Zambia",
+    "contact": {
+      "phone": "+260-978-555-321",
+      "email": "info@brightsmileclinic.com",
+      "website": "https://brightsmileclinic.com"
+    },
+    "hours": {
+      "monday_friday": "08:00 - 18:00",
+      "saturday": "09:00 - 14:00",
+      "sunday": "Closed"
+    },
+    "mission": "To provide exceptional and affordable dental care with compassion and innovation."
+  },
+
+  "services": [
+    {
+      "id": "SRV001",
+      "name": "Dental Cleaning",
+      "description": "Professional teeth cleaning to remove plaque, tartar, and stains.",
+      "duration_minutes": 30,
+      "price_range": "K200 - K400"
+    },
+    {
+      "id": "SRV002",
+      "name": "Tooth Extraction",
+      "description": "Safe removal of damaged or decayed teeth using sterile equipment.",
+      "duration_minutes": 45,
+      "price_range": "K250 - K600"
+    },
+    {
+      "id": "SRV003",
+      "name": "Dental Filling",
+      "description": "Restoration of cavities with composite or amalgam fillings.",
+      "duration_minutes": 40,
+      "price_range": "K300 - K800"
+    },
+    {
+      "id": "SRV004",
+      "name": "Orthodontic Consultation",
+      "description": "Assessment and planning for braces, aligners, or bite correction.",
+      "duration_minutes": 60,
+      "price_range": "K500 - K1000"
+    }
+  ],
+
+  "faq": [
+    {
+      "question": "Do you accept medical aid or insurance?",
+      "answer": "Yes, we accept several insurance plans including Madison, Liberty, and Sanlam. Please bring your insurance card during your visit."
+    },
+    {
+      "question": "How often should I get a dental check-up?",
+      "answer": "It’s recommended to visit your dentist every 6 months for preventive check-ups and cleaning."
+    },
+    {
+      "question": "Do you offer emergency dental services?",
+      "answer": "Yes, emergency treatments are available during office hours. For after-hours emergencies, please call our emergency number listed on the website."
+    },
+    {
+      "question": "Do tooth extractions hurt?",
+      "answer": "Extractions are done under local anesthesia to ensure you don’t feel pain, though mild soreness may follow after the procedure."
+    }
+  ],
+
+  "treatment_advice": {
+    "toothache": "Rinse with warm salt water, avoid hard foods, and schedule an appointment as soon as possible.",
+    "bleeding_gums": "Likely due to plaque buildup. Schedule a cleaning and improve brushing with a soft-bristled brush.",
+    "sensitivity": "Use toothpaste for sensitive teeth and avoid very hot or cold foods. Persistent issues may indicate enamel erosion."
+  },
+
+  "billing": {
+    "payment_methods": ["Cash", "Mobile Money", "Visa", "MasterCard"],
+    "currency": "ZMW",
+    "tax_rate": 0.16,
+    "discount_policy": "5% discount for payments made on the same day of treatment."
+  },
+
+  "clinic_team": [
+    {
+      "name": "Dr. Esther Njayi",
+      "title": "Dental Surgeon",
+      "specialization": "Oral Surgery and Cosmetic Dentistry",
+      "experience_years": 10
+    },
+    {
+      "name": "Dr. Kelvin Banda",
+      "title": "Orthodontist",
+      "specialization": "Braces and Aligners",
+      "experience_years": 7
+    },
+    {
+      "name": "Mary Chanda",
+      "title": "Dental Hygienist",
+      "specialization": "Teeth Cleaning and Preventive Care",
+      "experience_years": 5
+    }
+  ],
+
+  "ai_persona": {
+    "name": "SmartDent Assistant",
+    "version": "1.0",
+    "tone": "Friendly, professional, and empathetic",
+    "capabilities": [
+      "Answer dental FAQs",
+      "Help patients book appointments",
+      "Estimate treatment costs",
+      "Explain services and aftercare instructions",
+      "Provide oral hygiene tips",
+      "Connect patients with available dentists"
+    ],
+    "limitations": [
+      "Cannot provide official diagnoses",
+      "Does not replace professional medical advice",
+      "Information may vary based on individual patient cases"
+    ]
+  }
+}
