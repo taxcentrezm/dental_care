@@ -502,6 +502,49 @@ footer{
   background: #e6fffa;
 }
 
+    /* Suggestions chips */
+.suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #e0f2f1;
+  border-top: 1px solid #ccc;
+}
+.suggestion-chip {
+  background: #009688;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: 0.2s;
+}
+.suggestion-chip:hover {
+  background: #00796b;
+}
+
+/* Escalation buttons */
+.escalation {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0;
+}
+.escalation a {
+  flex: 1;
+  text-align: center;
+  background: #00796b;
+  color: white;
+  text-decoration: none;
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: 0.2s;
+}
+.escalation a:hover {
+  background: #004d40;
+}
+
 </style>
 </head>
 <body>
@@ -587,205 +630,176 @@ footer{
   </section>
   
  <!-- Floating Avatar -->
-  <div class="floating-avatar-wrapper">
-    <img src="avatar.gif" alt="Assistant Avatar" class="floating-avatar" onclick="toggleChat()" />
-    <div class="hover-greeting">👋 Hey there! I'm <b>SmartDent</b></div>
-  </div>
-
-  <!-- Chat Window -->
-  <div class="chat-window" id="chat-window">
-    <div class="chat-header" id="chat-header">
-      <span>SmartDent Assistant</span>
-      <!-- Assistant Mode Selector -->
-<div class="agent-select" id="agent-select">
-  <div class="assistant-dropdown" id="assistantDropdown" onclick="toggleAssistantMenu()">
-    <i data-feather="cpu"></i>
-    <span id="assistant-label">Generic Assistant</span>
-    <i data-feather="chevron-down" class="chevron"></i>
-  </div>
-
-  <ul class="assistant-menu" id="assistantMenu">
-    <li onclick="setAssistantMode('generic')">
-      <i data-feather="cpu"></i> Generic Assistant
-    </li>
-    <li onclick="setAssistantMode('ai')">
-      <i data-feather="zap"></i> AI Assistant (OpenAI)
-    </li>
-  </ul>
+<div class="floating-avatar-wrapper">
+  <img src="avatar.gif" alt="Assistant Avatar" class="floating-avatar" onclick="toggleChat()" />
+  <div class="hover-greeting">👋 Hey there! I'm <b>SmartDent</b></div>
 </div>
 
-      <button onclick="toggleChat()" style="background:none;border:none;color:white;font-size:16px;">×</button>
+<!-- Chat Window -->
+<div class="chat-window" id="chat-window">
+  <div class="chat-header">
+    <span>SmartDent Assistant</span>
+    <div class="agent-select">
+      <i data-feather="cpu"></i>
+      <select id="assistant-mode" class="assistant-dropdown">
+        <option value="generic">🧠 Generic Assistant</option>
+        <option value="ai">🤖 AI Assistant (OpenAI)</option>
+      </select>
     </div>
-    <div class="chat-log" id="chat-log">
-      <div class="message bot">👋 Hi! I’m SmartDent. How can I help you today?</div>
-    </div>
-    <div class="typing-indicator" id="typing-indicator">
-      <span></span><span></span><span></span>
-    </div>
-    <form id="chat-form">
-      <input type="text" id="chat-input" placeholder="Ask me anything..." autocomplete="off" />
-      <button type="submit">Send</button>
-    </form>
+    <button onclick="toggleChat()">⛶</button>
   </div>
+
+  <div class="chat-log" id="chat-log"></div>
+  <div class="typing-indicator" id="typing-indicator"><span></span><span></span><span></span></div>
   
+  <div id="suggestions" class="suggestions"></div>
+
+  <form id="chat-form">
+    <input type="text" id="chat-input" placeholder="Ask me anything..." autocomplete="off" />
+    <button type="submit">Send</button>
+  </form>
+</div>
+<script>feather.replace();</script>
 <script>
-  // ========================
-  // TOGGLE CHAT VISIBILITY
-  // ========================
-  function toggleChat() {
-    const chat = document.getElementById("chat-window");
-    chat.style.display = chat.style.display === "flex" ? "none" : "flex";
-  }
+let assistantMode = "generic";
+let knowledge = {};
 
-  let assistantMode = "generic";
+const chatWindow = document.getElementById("chat-window");
+const chatLog = document.getElementById("chat-log");
+const chatInput = document.getElementById("chat-input");
+const typing = document.getElementById("typing-indicator");
+const form = document.getElementById("chat-form");
+const modeSelect = document.getElementById("assistant-mode");
+const suggestionsContainer = document.getElementById("suggestions");
 
-  function toggleAssistantMenu() {
-    document.getElementById("assistantMenu").classList.toggle("show");
-  }
+// Load localStorage memory and knowledge
+window.addEventListener("load", async () => {
+  const savedChat = localStorage.getItem("smartdentChat");
+  if (savedChat) chatLog.innerHTML = savedChat;
+  else addMessage("👋 Hello! I'm SmartDent, your dental assistant. How can I help today?", "bot");
 
-  function setAssistantMode(mode) {
-    assistantMode = mode;
-    const label = document.getElementById("assistant-label");
-    const dropdown = document.getElementById("assistantDropdown");
-    const menu = document.getElementById("assistantMenu");
+  const res = await fetch("knowledge.json");
+  knowledge = await res.json();
+  showSuggestions();
+});
 
-    if (mode === "generic") {
-      label.textContent = "Generic Assistant";
-      addSystemMessage("🧠 Switched to Generic Assistant — using built-in dataset.");
-    } else {
-      label.textContent = "AI Assistant (OpenAI)";
-      addSystemMessage("⚡ Switched to AI Assistant — powered by OpenAI.");
-    }
+// Save chat
+function saveChat() { localStorage.setItem("smartdentChat", chatLog.innerHTML); }
 
-    // Safe icon update
-    const icon = dropdown.querySelector("i[data-feather]");
-    if (icon) {
-      icon.setAttribute("data-feather", mode === "generic" ? "cpu" : "zap");
-      feather.replace();
-    }
+// Toggle chat window
+function toggleChat() {
+  chatWindow.style.display = chatWindow.style.display === "flex" ? "none" : "flex";
+}
 
-    menu.classList.remove("show");
-  }
+// Add message
+function addMessage(text, sender, options = {}) {
+  const msg = document.createElement("div");
+  msg.className = "message " + sender;
+  msg.textContent = text;
 
-  function addSystemMessage(msg) {
-    const chatLog = document.getElementById("chat-log");
-    const sysMsg = document.createElement("div");
-    sysMsg.className = "chat-message system-message";
-    sysMsg.textContent = msg;
-    chatLog.appendChild(sysMsg);
-    chatLog.scrollTop = chatLog.scrollHeight;
-  }
+  // Optional HTML insertion
+  if (options.html) msg.innerHTML = options.html;
 
-  // Close dropdown if clicking outside
-  document.addEventListener("click", (e) => {
-    const menu = document.getElementById("assistantMenu");
-    const dropdown = document.getElementById("assistantDropdown");
-    if (!dropdown.contains(e.target)) {
-      menu.classList.remove("show");
-    }
+  chatLog.appendChild(msg);
+  chatLog.scrollTop = chatLog.scrollHeight;
+  saveChat();
+}
+
+// Show auto-suggestions
+function showSuggestions() {
+  suggestionsContainer.innerHTML = "";
+  knowledge.faq.forEach(f => {
+    const chip = document.createElement("div");
+    chip.className = "suggestion-chip";
+    chip.textContent = f.question;
+    chip.onclick = () => {
+      chatInput.value = f.question;
+      chatForm.dispatchEvent(new Event('submit'));
+    };
+    suggestionsContainer.appendChild(chip);
   });
+}
 
-  // ========================
-  // CHAT ELEMENTS
-  // ========================
-  const chatLog = document.getElementById("chat-log");
-  const chatForm = document.getElementById("chat-form");
-  const chatInput = document.getElementById("chat-input");
-  const typing = document.getElementById("typing-indicator");
-  const agentName = document.getElementById("agent-name");
+// Handle query
+async function handleQuery(q) {
+  const query = q.toLowerCase();
 
-  // ========================
-  // DATASET
-  // ========================
-  const dataset = [
-    {
-      keywords: ["leave", "holiday", "day off"],
-      a: "Employees can apply for leave via the HR portal under ‘My Requests’ → ‘New Leave’."
-    },
-    {
-      keywords: ["salary", "pay", "payslip", "wage"],
-      a: "Salaries are processed on the 25th of each month, unless a weekend or holiday."
-    },
-    {
-      keywords: ["location", "address", "where"],
-      a: "We’re located in Kabwe, near the Civic Centre."
-    },
-    {
-      keywords: ["contact", "email", "phone"],
-      a: "You can reach us via WhatsApp at +260 97 000 0000 or email info@smartdentzm.com."
-    },
-    {
-      keywords: ["appointment", "book", "schedule"],
-      a: "You can schedule an appointment using the WhatsApp link: https://wa.me/260970000000"
-    },
-    {
-      keywords: ["research", "data", "analysis"],
-      a: "You can access research data in the Resources tab of your ERP dashboard."
-    },
-    {
-      keywords: ["live", "human", "help now"],
-      a: "Connecting you to a live assistant — please reach us on WhatsApp or Email below."
-    },
-    {
-      keywords: ["thank", "thanks", "appreciate"],
-      a: "You're most welcome 😊! I'm here to help anytime."
-    },
-    {
-      keywords: ["hi", "hello", "hey"],
-      a: "Hello there 👋! How can I assist you today?"
-    }
-  ];
+  // Clinic info
+  if (query.includes("location")) return `📍 We are located in ${knowledge.clinic_info.location}.`;
+  if (query.includes("contact")) return `☎️ Phone: ${knowledge.clinic_info.contact.phone}\n📧 Email: ${knowledge.clinic_info.contact.email}`;
 
-  // ========================
-  // MESSAGE HANDLING
-  // ========================
-  function addMessage(text, sender = "bot") {
-    const msg = document.createElement("div");
-    msg.classList.add("message", sender);
-    msg.textContent = text;
-    chatLog.appendChild(msg);
-    chatLog.scrollTop = chatLog.scrollHeight;
+  // Services
+  const service = knowledge.services.find(s => query.includes(s.name.toLowerCase().split(" ")[0]));
+  if (service) return `${service.name}: ${service.description} (${service.price_range}, ${service.duration_minutes} min).`;
+
+  // FAQ
+  const faq = knowledge.faq.find(f => query.includes(f.question.toLowerCase().split(" ")[1]));
+  if (faq) return faq.answer;
+
+  // Treatment advice
+  for (const [condition, advice] of Object.entries(knowledge.treatment_advice)) {
+    if (query.includes(condition)) return `🦷 ${advice}`;
   }
 
-  async function replyMessage(query) {
-    typing.style.display = "flex";
-    const lower = query.toLowerCase();
-    let response = null;
+  // Billing
+  if (query.includes("payment") || query.includes("price"))
+    return `💳 We accept ${knowledge.billing.payment_methods.join(", ")}. Currency: ${knowledge.billing.currency}.`;
 
-    // Local dataset matching
-    for (const item of dataset) {
-      if (item.keywords.some(k => lower.includes(k))) {
-        response = item.a;
-        break;
-      }
-    }
-
-    // If AI Mode
-    if (assistantMode === "ai" && !response) {
-      response = "Let me analyze that... 🤔 (In AI mode, I can provide deeper insights if connected to OpenAI API.)";
-    }
-
-    // Fallback generic
-    if (!response) {
-      response = "Hmm… I’m not sure, but I can connect you to a live assistant on WhatsApp or via email.";
-    }
-
-    await new Promise(r => setTimeout(r, 800));
-    typing.style.display = "none";
-    addMessage(response, "bot");
+  // Fallback
+  if (assistantMode === "ai") {
+    return await askOpenAI(q);
+  } else {
+    // Show escalation buttons
+    return {
+      html: `
+        I’m not sure about that, but you can contact us directly:<br>
+        <div class="escalation">
+          <a href="https://wa.me/260571544364" target="_blank">WhatsApp</a>
+          <a href="mailto:info@smaitdev.com">Email</a>
+        </div>
+      `
+    };
   }
+}
 
-  // ========================
-  // EVENT LISTENER
-  // ========================
-  chatForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const text = chatInput.value.trim();
-    if (!text) return;
-    addMessage(text, "user");
-    chatInput.value = "";
-    replyMessage(text);
-  });
+// AI mode backend
+async function askOpenAI(prompt) {
+  try {
+    const res = await fetch("/api/openai", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt })
+    });
+    const data = await res.json();
+    return data.answer || "AI mode unavailable.";
+  } catch {
+    return "AI service not reachable.";
+  }
+}
+
+// Form submit
+form.addEventListener("submit", async e => {
+  e.preventDefault();
+  const text = chatInput.value.trim();
+  if (!text) return;
+  addMessage(text, "user");
+  chatInput.value = "";
+  typing.style.display = "flex";
+
+  await new Promise(r => setTimeout(r, 500));
+  const response = await handleQuery(text);
+  typing.style.display = "none";
+
+  if (typeof response === "string") addMessage(response, "bot");
+  else addMessage("", "bot", { html: response.html });
+});
+
+// Switch assistant mode
+modeSelect.addEventListener("change", e => {
+  assistantMode = e.target.value;
+  addMessage(assistantMode === "ai" ? "🤖 AI Mode activated." : "🧠 Generic mode active.", "bot");
+});
+
 </script>
 
 <!-- Three-Sided Appointment Modal -->
