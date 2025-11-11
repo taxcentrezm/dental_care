@@ -2,13 +2,22 @@ import express from 'express';
 import fetch from 'node-fetch';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 dotenv.config(); // store your key in .env as OPENAI_API_KEY
 
 const app = express();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 app.use(cors());
 app.use(express.json());
 
+// Serve static files from public/
+app.use(express.static(path.join(__dirname, 'public')));
+
+// OpenAI endpoint
 app.post('/api/openai', async (req, res) => {
   const { prompt } = req.body;
 
@@ -36,6 +45,16 @@ app.post('/api/openai', async (req, res) => {
     console.error(err);
     res.status(500).json({ answer: "AI service error." });
   }
+});
+
+// Serve knowledge.json
+app.get('/knowledge.json', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'knowledge.json'));
+});
+
+// SPA fallback: serve index.html for unknown routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 const PORT = process.env.PORT || 5000;
